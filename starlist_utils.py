@@ -91,7 +91,7 @@ class Starlist(object):
 
         tic_query = Catalogs.query_object(f"TIC {x['TIC ID'].item()}", radius=0.00013, catalog="TIC").to_pandas().iloc[0]
 
-        new = new.append({'TOI':x.TOI.item(),
+        new = pd.concat([new,pd.DataFrame({'TOI':x.TOI.item(),
             'TIC ID':x['TIC ID'].item(),
             'RA':x.RA.item(),
             'Dec':x.Dec.item(),
@@ -100,9 +100,9 @@ class Starlist(object):
             'SG3 Priority':x['SG3'].item(),
             'Planet Radius (TOI)':x['Planet Radius (R_Earth)'].item(),
             'Teff (TOI)':x['Stellar Eff Temp (K)'].item(),
-            'comment':comment},ignore_index=True)
+            'comment':comment},index=[0])],ignore_index=True)
 
-        self.targets = pd.concat([self.targets,new]).reset_index(drop=True)
+        self.targets = pd.concat([self.targets,new],ignore_index=True).reset_index(drop=True)
 
     def remove_target(self,toi=None):
 
@@ -154,7 +154,8 @@ class Starlist(object):
         
         df.TOI = "TOI"+df.TOI.astype(str).str.split(".").str[0] + "          " #reformat name
 
-        df=df.append(tics) #add back in the TIC only targets
+        #df=df.append(tics) #add back in the TIC only targets
+        df = pd.concat([df,tics],ignore_index=True)
 
         f = pd.DataFrame({'Target':df.TOI,'RA':df.RA,'Dec':df.Dec,'Equinox':['2000.0']*len(df.index)}) #create new dataframe
 
